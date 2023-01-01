@@ -4,6 +4,10 @@ SRC := $(shell find {synx,tests} -name "*.py")
 test:
 	@poetry run pytest -vv --exitfirst
 
+.PHONY: typecheck
+typecheck:
+	@poetry run mypy synx/
+
 .PHONY: format
 format:
 	@poetry run autoflake --remove-all-unused-imports -i $(SRC)
@@ -13,3 +17,11 @@ format:
 .PHONY: list-todo
 list-todo:
 	@grep --color=auto -Hn -E '^(.*)TODO:(.*)$$' *.py
+
+.PHONY: clean
+clean:
+	rm -rf **/__pycache__
+	rm -rf **/.ipynb_checkpoints
+	rm -rf .mypy_cache
+	rm -rf .hypothesis
+	rm -rf .pytest_cache

@@ -31,8 +31,8 @@ union(
 @dataclass
 class Expr:
     # union
-    atom: str = None
-    children: list = None
+    atom: str | None = None
+    children: list | None = None
 
 
 @dataclass
@@ -119,7 +119,7 @@ def generate_single(
     Generate a single list of tokens from the `grammar`, given the `start` symbol.
     """
 
-    def _inner(expr, depth=0):
+    def _inner(expr: Expr, depth: int = 0) -> list[str]:
         if depth == max_depth:
             return []
 
@@ -128,18 +128,25 @@ def generate_single(
 
         match expr:
             case Or() as x:
+                assert x.children is not None
                 return _inner(random.choice(x.children), depth)
 
             case And() as x:
+                assert x.children is not None
                 return sum((_inner(c, depth + 1) for c in x.children), [])
 
             case Literal() as x:
+                assert x.atom is not None
                 return [x.atom]
 
             case Symbol() as x:
+                assert x.atom is not None
                 if x.atom not in grammar:
                     raise ValueError(f"Symbol {x.atom} is not part of the grammar")
                 return _inner(grammar[x.atom], depth)
+
+            case _:
+                raise ValueError(f"Invalid expression: {expr}")
 
     return _inner(Symbol(atom=start))
 
