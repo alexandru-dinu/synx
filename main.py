@@ -147,9 +147,7 @@ def generate_single(
 def main(args):
     grammar = parse_grammar(args.input_file)
     # print(grammar)
-    out = generate_single(
-        grammar, start="<start>", max_depth=args.max_depth, verbose=args.verbose
-    )
+    out = generate_single(grammar, args.start, args.max_depth, args.verbose)
     # print(out)
     print("".join(out))
 
@@ -158,6 +156,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Hello")
     parser.add_argument(
         "-f", "--input-file", type=Path, required=True, help="Path to the BNF."
+    )
+    parser.add_argument(
+        "-s", "--start", type=str, required=True, help="Starting symbol."
     )
     parser.add_argument(
         "-d",
