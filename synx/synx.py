@@ -96,7 +96,7 @@ def parse_or(x: str) -> Expr:
 def parse_grammar(input_file: Path) -> Grammar:
     grammar = {}
 
-    with open(args.input_file) as fp:
+    with open(input_file) as fp:
         lines = [x.strip() for x in fp]
 
     for i, line in enumerate(lines, start=1):
