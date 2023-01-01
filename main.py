@@ -124,11 +124,11 @@ def generate_single(
             return []
 
         if verbose:
-            print(f'{"  " * depth}>{expr}')
+            print(f'[{depth}]{" " * depth}>{expr}')
 
         match expr:
             case Or() as x:
-                return _inner(random.choice(x.children), depth + 1)
+                return _inner(random.choice(x.children), depth)
 
             case And() as x:
                 return sum((_inner(c, depth + 1) for c in x.children), [])
