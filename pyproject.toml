@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "synx"
+version = "0.1.0"
+description = "Generate random strings given a BNF grammar."
+authors = ["Alexandru Dinu <alex.dinu07@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+rich = "^13.0.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.12.0"
+mypy = "^0.991"
+isort = "^5.11.4"
+autoflake = "^2.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -153,7 +153,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser("Hello")
+    parser = argparse.ArgumentParser("Generate random strings given a BNF grammar.")
     parser.add_argument(
         "-f", "--input-file", type=Path, required=True, help="Path to the BNF."
     )
