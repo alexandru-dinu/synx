@@ -32,7 +32,7 @@ union(
 class Expr:
     # union
     atom: str | None = None
-    children: list | None = None
+    children: list["Expr"] | None = None
 
 
 @dataclass
