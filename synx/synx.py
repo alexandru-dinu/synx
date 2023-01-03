@@ -4,12 +4,13 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+import exrex
 from rich import print
 
 """
 The BNF ADT defined using Haskell syntax:
 ```
-data Expr = Literal String | Symbol String | And [Expr] | Or [Expr]
+data Expr = Terminal String | Symbol String | And [Expr] | Or [Expr]
 ```
 
 In Python it's a bit verbose to translate this definition.
@@ -19,7 +20,7 @@ the code for dataclasses given a Haskell-like ADT definition.
 Alternatively, we could have used enums to represent the `kind` of the expression
 and define an expression object as a dataclass with the following fields:
 ```
-kind: enum[Literal, Symbol, And, Or]
+kind: enum[Terminal, Symbol, And, Or]
 union(
     name: str        # for literals & symbols
     children: [Expr] # for And & Or
@@ -36,8 +37,9 @@ class Expr:
 
 
 @dataclass
-class Literal(Expr):
-    pass
+class Terminal(Expr):
+    # distinguish between regex and literal, e.g.: r"[0-9]+" and "+"
+    is_re: bool = False
 
 
 @dataclass
@@ -62,11 +64,16 @@ Grammar = dict[str, Expr]
 
 
 def parse_atomic(x: str) -> Expr:
-    match x[0]:
-        case '"' | "'":
-            return Literal(atom=x.strip()[1:-1])
-        case "<":
+    match list(x):
+        case ['"', *ss, '"'] | ["'", *ss, "'"]:
+            return Terminal(atom="".join(ss), is_re=False)
+
+        case ["r", '"', *ss, '"'] | ["r", "'", *ss, "'"]:
+            return Terminal(atom=r"".join(ss), is_re=True)
+
+        case ["<", *_, ">"]:
             return Symbol(atom=x)
+
         case _:
             raise ValueError(f"Invalid atom: {x}")
 
@@ -135,9 +142,13 @@ def generate_single(
                 assert x.children is not None
                 return sum((_inner(c, depth + 1) for c in x.children), [])
 
-            case Literal() as x:
+            case Terminal() as x:
                 assert x.atom is not None
-                return [x.atom]
+                if x.is_re:
+                    out = exrex.getone(x.atom)
+                else:
+                    out = x.atom
+                return [out]
 
             case Symbol() as x:
                 assert x.atom is not None
