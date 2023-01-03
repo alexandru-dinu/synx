@@ -16,7 +16,7 @@ format:
 
 .PHONY: list-todo
 list-todo:
-	@grep --color=auto -Hn -E '^(.*)TODO:(.*)$$' *.py
+	@grep --color=auto -Hn -E '^(.*)TODO:(.*)$$' $(SRC)
 
 .PHONY: clean
 clean:
