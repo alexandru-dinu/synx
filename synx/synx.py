@@ -138,7 +138,7 @@ def generate_single(
 
     def _inner(expr: Expr, depth: int = 0) -> list[str]:
         if depth == max_depth:
-            return []
+            return None
 
         if verbose:
             print(f'[{depth}]{" " * depth}>{expr}')
@@ -150,7 +150,13 @@ def generate_single(
 
             case And() as x:
                 assert x.children is not None
-                return sum((_inner(c, depth + 1) for c in x.children), [])
+                out = []
+                for c in x.children:
+                    if (y := _inner(c, depth + 1)) is not None:
+                        out.extend(y)
+                    else:
+                        return None
+                return out
 
             case Terminal() as x:
                 assert x.atom is not None
@@ -172,7 +178,9 @@ def generate_single(
             case _:
                 _exit_with_error(f"Invalid expression: {expr}")
 
-    return _inner(Symbol(atom=start))
+    while True:
+        if (out := _inner(Symbol(atom=start))) is not None:
+            return out
 
 
 def main(args):
