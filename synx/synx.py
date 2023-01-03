@@ -74,6 +74,45 @@ def _exit_with_error(msg: str, file: str = None, line: int = None) -> None:
     exit(1)
 
 
+def is_quote(c: str) -> bool:
+    return c in ('"', "'")
+
+
+def syntax_aware_split(x: str, sep: str):
+    """
+    Split a string by `sep` accounting for literals.
+
+    TODO: write a more idiomatic version.
+    """
+    groups = []
+    cur = []
+    in_paren = False
+    m = len(sep)
+    i = 0
+
+    while i < len(x):
+        try:
+            if x[i : i + m] == sep and not in_paren:
+                groups.append(cur)
+                cur = []
+                i += m
+                continue
+        except IndexError as e:
+            _exit_with_error(e)
+
+        # TODO: differentiate b/w ' and "
+        if is_quote(x[i]):
+            in_paren ^= True
+
+        cur.append(x[i])
+        i += 1
+
+    if cur:
+        groups.append(cur)
+
+    return ["".join(g) for g in groups]
+
+
 def parse_atomic(x: str) -> Expr:
     match list(x):
         case ['"', *ss, '"'] | ["'", *ss, "'"]:
@@ -90,10 +129,7 @@ def parse_atomic(x: str) -> Expr:
 
 
 def parse_and(x: str) -> Expr:
-    """
-    TODO: careful when splitting by sep that can be part of literals.
-    """
-    values = [parse_atomic(item.strip()) for item in x.split(" ")]
+    values = [parse_atomic(item.strip()) for item in syntax_aware_split(x, sep=" ")]
     if len(values) == 1:
         return values[0]
     else:
@@ -101,10 +137,7 @@ def parse_and(x: str) -> Expr:
 
 
 def parse_or(x: str) -> Expr:
-    """
-    TODO: careful when splitting by sep that can be part of literals.
-    """
-    values = [parse_and(item.strip()) for item in x.split("|")]
+    values = [parse_and(item.strip()) for item in syntax_aware_split(x, sep="|")]
     if len(values) == 1:
         return values[0]
     else:
@@ -119,8 +152,7 @@ def parse_grammar(input_file: Path) -> Grammar:
 
     for i, line in enumerate(lines, start=1):
         try:
-            # TODO: careful when splitting by sep that can be part of literals.
-            sym, rule = map(lambda x: x.strip(), line.split("::="))
+            sym, rule = map(lambda x: x.strip(), syntax_aware_split(line, sep="::="))
         except ValueError:
             _exit_with_error(f"could not parse {line=}", file=input_file, line=i)
 

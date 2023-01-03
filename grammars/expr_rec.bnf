@@ -1,3 +1,4 @@
-<expr> ::= <num> | <expr> <op> <expr>
+<expr> ::= <num> | <expr> <spc> <op> <spc> <expr>
 <num>  ::= "0" | r"[1-9][0-9]{0,5}"
 <op>   ::= "+" | "-"
+<spc>  ::= " "

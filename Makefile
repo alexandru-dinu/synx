@@ -2,7 +2,7 @@ SRC := $(shell find {synx,tests} -name "*.py")
 
 .PHONY: test
 test:
-	@poetry run pytest -vv --exitfirst --hypothesis-show-statistics
+	@poetry run pytest -s -vv --exitfirst --hypothesis-show-statistics
 
 .PHONY: typecheck
 typecheck:

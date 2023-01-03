@@ -1,0 +1,3 @@
+<start> ::= <nil> | "(" <spc> <start> <spc> ")" | "|>" <spc> <start> <spc> "<|" | <start> <start>
+<spc>   ::= " " | <nil>
+<nil>   ::= ""
