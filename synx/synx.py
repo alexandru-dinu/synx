@@ -63,6 +63,17 @@ AST: mapping <symbol> names to expressions (substitution rules).
 Grammar = dict[str, Expr]
 
 
+def _exit_with_error(msg: str, file: str = None, line: int = None) -> None:
+    err = f"ERROR: {msg}"
+
+    if file is not None and line is not None:
+        print(f"{file}:{line}: {err}", file=sys.stderr)
+    else:
+        print(err, file=sys.stderr)
+
+    exit(1)
+
+
 def parse_atomic(x: str) -> Expr:
     match list(x):
         case ['"', *ss, '"'] | ["'", *ss, "'"]:
@@ -75,7 +86,7 @@ def parse_atomic(x: str) -> Expr:
             return Symbol(atom=x)
 
         case _:
-            raise ValueError(f"Invalid atom: {x}")
+            _exit_with_error(f"Invalid atom: {x}")
 
 
 def parse_and(x: str) -> Expr:
@@ -111,8 +122,7 @@ def parse_grammar(input_file: Path) -> Grammar:
             # TODO: careful when splitting by sep that can be part of literals.
             sym, rule = map(lambda x: x.strip(), line.split("::="))
         except ValueError:
-            print(f"{input_file}:{i}: ERROR: could not parse {line=}", file=sys.stderr)
-            exit(1)
+            _exit_with_error(f"could not parse {line=}", file=input_file, line=i)
 
         grammar[sym] = parse_or(rule)
 
@@ -153,11 +163,14 @@ def generate_single(
             case Symbol() as x:
                 assert x.atom is not None
                 if x.atom not in grammar:
-                    raise ValueError(f"Symbol {x.atom} is not part of the grammar")
+                    _exit_with_error(
+                        f"Symbol {x.atom} is not part of the grammar. Available symbols: {list(grammar.keys())}"
+                    )
+
                 return _inner(grammar[x.atom], depth)
 
             case _:
-                raise ValueError(f"Invalid expression: {expr}")
+                _exit_with_error(f"Invalid expression: {expr}")
 
     return _inner(Symbol(atom=start))
 
