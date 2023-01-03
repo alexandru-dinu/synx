@@ -1,4 +1,5 @@
 import argparse
+import os
 import random
 import sys
 from dataclasses import dataclass
@@ -27,6 +28,12 @@ union(
 )
 ```
 """
+
+
+class Special:
+    DEF = "::="
+    AND_SEP = " "
+    OR_SEP = "|"
 
 
 @dataclass
@@ -63,7 +70,9 @@ AST: mapping <symbol> names to expressions (substitution rules).
 Grammar = dict[str, Expr]
 
 
-def _exit_with_error(msg: str, file: str = None, line: int = None) -> None:
+def _exit_with_error(
+    msg: str, file: os.PathLike | None = None, line: int | None = None
+) -> None:
     err = f"ERROR: {msg}"
 
     if file is not None and line is not None:
@@ -78,14 +87,14 @@ def is_quote(c: str) -> bool:
     return c in ('"', "'")
 
 
-def syntax_aware_split(x: str, sep: str):
+def syntax_aware_split(x: str, sep: str) -> list[str]:
     """
     Split a string by `sep` accounting for literals.
 
     TODO: write a more idiomatic version.
     """
-    groups = []
-    cur = []
+    groups: list[list[str]] = []
+    cur: list[str] = []
     in_paren = False
     m = len(sep)
     i = 0
@@ -98,7 +107,7 @@ def syntax_aware_split(x: str, sep: str):
                 i += m
                 continue
         except IndexError as e:
-            _exit_with_error(e)
+            _exit_with_error(str(e))
 
         # TODO: differentiate b/w ' and "
         if is_quote(x[i]):
@@ -127,9 +136,14 @@ def parse_atomic(x: str) -> Expr:
         case _:
             _exit_with_error(f"Invalid atom: {x}")
 
+    assert False, "unreachable"
+
 
 def parse_and(x: str) -> Expr:
-    values = [parse_atomic(item.strip()) for item in syntax_aware_split(x, sep=" ")]
+    values = [
+        parse_atomic(item.strip())
+        for item in syntax_aware_split(x, sep=Special.AND_SEP)
+    ]
     if len(values) == 1:
         return values[0]
     else:
@@ -137,7 +151,9 @@ def parse_and(x: str) -> Expr:
 
 
 def parse_or(x: str) -> Expr:
-    values = [parse_and(item.strip()) for item in syntax_aware_split(x, sep="|")]
+    values = [
+        parse_and(item.strip()) for item in syntax_aware_split(x, sep=Special.OR_SEP)
+    ]
     if len(values) == 1:
         return values[0]
     else:
@@ -152,7 +168,9 @@ def parse_grammar(input_file: Path) -> Grammar:
 
     for i, line in enumerate(lines, start=1):
         try:
-            sym, rule = map(lambda x: x.strip(), syntax_aware_split(line, sep="::="))
+            sym, rule = map(
+                lambda x: x.strip(), syntax_aware_split(line, sep=Special.DEF)
+            )
         except ValueError:
             _exit_with_error(f"could not parse {line=}", file=input_file, line=i)
 
@@ -168,7 +186,7 @@ def generate_single(
     Generate a single list of tokens from the `grammar`, given the `start` symbol.
     """
 
-    def _inner(expr: Expr, depth: int = 0) -> list[str]:
+    def _inner(expr: Expr, depth: int = 0) -> list[str] | None:
         if depth == max_depth:
             return None
 
@@ -192,11 +210,7 @@ def generate_single(
 
             case Terminal() as x:
                 assert x.atom is not None
-                if x.is_re:
-                    out = exrex.getone(x.atom)
-                else:
-                    out = x.atom
-                return [out]
+                return [exrex.getone(x.atom)] if x.is_re else [x.atom]
 
             case Symbol() as x:
                 assert x.atom is not None
@@ -204,11 +218,12 @@ def generate_single(
                     _exit_with_error(
                         f"Symbol {x.atom} is not part of the grammar. Available symbols: {list(grammar.keys())}"
                     )
-
                 return _inner(grammar[x.atom], depth)
 
             case _:
                 _exit_with_error(f"Invalid expression: {expr}")
+
+        assert False, "unreachable"
 
     while True:
         if (out := _inner(Symbol(atom=start))) is not None:
