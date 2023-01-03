@@ -63,4 +63,4 @@ Generating random strings from regular expressions is done using the [exrex][2] 
 
 [1]: https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form
 [2]: https://github.com/asciimoo/exrex
-[^1]: Inspired by [@rexim](https://github.com/rexim) on a [twitch stream](https://www.twitch.tv/videos/1693721389)
+[^1]: Inspired by [@rexim](https://github.com/rexim)
