@@ -2,7 +2,7 @@ import argparse
 import os
 import random
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import exrex
@@ -38,30 +38,28 @@ class Special:
 
 @dataclass
 class Expr:
-    # union
-    atom: str | None = None
-    children: list["Expr"] | None = None
+    pass
 
 
 @dataclass
 class Terminal(Expr):
-    # distinguish between regex and literal, e.g.: r"[0-9]+" and "+"
-    is_re: bool = False
+    atom: str
+    is_re: bool = False  # distinguish b/w regex and literal, e.g.: r"[0-9]+" and "+"
 
 
 @dataclass
 class Symbol(Expr):
-    pass
+    atom: str
 
 
 @dataclass
 class And(Expr):
-    pass
+    children: list[Expr] = field(default_factory=list)
 
 
 @dataclass
 class Or(Expr):
-    pass
+    children: list[Expr] = field(default_factory=list)
 
 
 """
