@@ -25,3 +25,4 @@ clean:
 	rm -rf .mypy_cache
 	rm -rf .hypothesis
 	rm -rf .pytest_cache
+	rm -rf .ruff_cache
