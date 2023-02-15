@@ -1,3 +1,6 @@
-<start> ::= <nil> | "(" <spc> <start> <spc> ")" | "|>" <spc> <start> <spc> "<|" | <start> <start>
-<spc>   ::= " " | <nil>
-<nil>   ::= ""
+<start>    ::= <p_round> | <p_square>
+<choice>   ::= <start> | <nil>
+<p_round>  ::= "(" <spc> <choice> <spc> ")"
+<p_square> ::= "[" <spc> <choice> <spc> "]"
+<spc>      ::= ""
+<nil>      ::= ""
