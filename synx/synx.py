@@ -3,6 +3,7 @@ import os
 import random
 import sys
 from dataclasses import dataclass, field
+from itertools import count
 from pathlib import Path
 
 import exrex
@@ -223,8 +224,10 @@ def generate_single(
 
         assert False, "unreachable"
 
-    while True:
+    for k in count(1):
         if (out := _inner(Symbol(atom=start))) is not None:
+            if verbose:
+                print(f"Computed in {k} trial(s)")
             return out
 
 
