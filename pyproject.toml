@@ -10,7 +10,6 @@ python = "^3.10"
 rich = "^13.0.0"
 exrex = "^0.10.5"
 
-
 [tool.poetry.group.dev.dependencies]
 black = "^22.12.0"
 mypy = "^0.991"
@@ -18,6 +17,19 @@ isort = "^5.11.4"
 autoflake = "^2.0.0"
 pytest = "^7.2.0"
 hypothesis = "^6.61.0"
+ruff = "^0.0.263"
+
+[tool.ruff]
+select = [
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "F", # pyflakes
+    "C", # flake8-comprehensions
+    "B", # flake8-bugbear
+]
+ignore = [
+    "E501",  # line too long, handled by black
+]
 
 [build-system]
 requires = ["poetry-core"]

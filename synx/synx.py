@@ -135,7 +135,7 @@ def parse_atomic(x: str) -> Expr:
         case _:
             _exit_with_error(f"Invalid atom: {x}")
 
-    assert False, "unreachable"
+    raise AssertionError("unreachable")
 
 
 def parse_and(x: str) -> Expr:
@@ -167,9 +167,7 @@ def parse_grammar(input_file: Path) -> Grammar:
 
     for i, line in enumerate(lines, start=1):
         try:
-            sym, rule = map(
-                lambda x: x.strip(), syntax_aware_split(line, sep=Special.DEF)
-            )
+            sym, rule = (x.strip() for x in syntax_aware_split(line, sep=Special.DEF))
         except ValueError:
             _exit_with_error(f"could not parse {line=}", file=input_file, line=i)
 
@@ -222,13 +220,17 @@ def generate_single(
             case _:
                 _exit_with_error(f"Invalid expression: {expr}")
 
-        assert False, "unreachable"
+        raise AssertionError("unreachable")
+
+    # -- inner func
 
     for k in count(1):
         if (out := _inner(Symbol(atom=start))) is not None:
             if verbose:
                 print(f"Computed in {k} trial(s)")
             return out
+
+    raise AssertionError("unreachable")
 
 
 def main(args):

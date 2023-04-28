@@ -1,3 +1,4 @@
+SHELL := /usr/bin/bash
 SRC := $(shell find {synx,tests} -name "*.py")
 
 .PHONY: test
@@ -7,6 +8,10 @@ test:
 .PHONY: typecheck
 typecheck:
 	@poetry run mypy synx/
+
+.PHONY: lint
+lint:
+	@poetry run ruff check $(SRC)
 
 .PHONY: format
 format:
